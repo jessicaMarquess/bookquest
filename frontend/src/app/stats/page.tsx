@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import { API_URL } from "@/lib/api";
 
 interface Stats {
   totalBooks: number;
@@ -49,7 +50,7 @@ export default function StatsPage() {
 
   const loadStats = useCallback(async () => {
     if (!token) return;
-    const res = await fetch("/api/stats", {
+    const res = await fetch(`${API_URL}/api/stats`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 401) {

@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { API_URL } from "@/lib/api";
 
 interface Book {
   _id: string;
@@ -27,7 +28,7 @@ interface BookCardProps {
 
 export default function BookCard({ book, token, onUpdate }: BookCardProps) {
   async function handleStatusChange(newStatus: string) {
-    await fetch(`/api/books/${book._id}`, {
+    await fetch(`${API_URL}/api/books/${book._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +40,7 @@ export default function BookCard({ book, token, onUpdate }: BookCardProps) {
   }
 
   async function handleDelete() {
-    await fetch(`/api/books/${book._id}`, {
+    await fetch(`${API_URL}/api/books/${book._id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

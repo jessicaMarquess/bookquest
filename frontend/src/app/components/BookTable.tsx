@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { useMemo, useState } from "react";
+import { API_URL } from "@/lib/api";
 
 interface Book {
   _id: string;
@@ -75,7 +76,7 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
   }, [books, filterTitle, filterAuthor, filterGenre, filterStatus, filterDate]);
 
   async function handleStatusChange(bookId: string, newStatus: string) {
-    await fetch(`/api/books/${bookId}`, {
+    await fetch(`${API_URL}/api/books/${bookId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +88,7 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
   }
 
   async function handleDelete(bookId: string) {
-    await fetch(`/api/books/${bookId}`, {
+    await fetch(`${API_URL}/api/books/${bookId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

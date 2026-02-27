@@ -14,6 +14,7 @@ import BookForm from "../components/BookForm";
 import BookTable from "../components/BookTable";
 import LevelBar from "../components/LevelBar";
 import Navbar from "../components/Navbar";
+import { API_URL } from "@/lib/api";
 
 interface Profile {
   name: string;
@@ -60,8 +61,8 @@ export default function Dashboard() {
     const headers = { Authorization: `Bearer ${token}` };
 
     const [profileRes, booksRes] = await Promise.all([
-      fetch("/api/profile", { headers }),
-      fetch("/api/books", { headers }),
+      fetch(`${API_URL}/api/profile`, { headers }),
+      fetch(`${API_URL}/api/books`, { headers }),
     ]);
 
     if (profileRes.status === 401) {

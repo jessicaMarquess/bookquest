@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { API_URL } from "@/lib/api";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    const res = await fetch("/api/auth/register", {
+    const res = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),

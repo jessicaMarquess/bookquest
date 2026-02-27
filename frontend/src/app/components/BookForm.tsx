@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { API_URL } from "@/lib/api";
 
 interface Book {
   _id: string;
@@ -47,7 +48,7 @@ export default function BookForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const url = isEditing ? `/api/books/${editBook._id}` : "/api/books";
+    const url = isEditing ? `${API_URL}/api/books/${editBook._id}` : `${API_URL}/api/books`;
     const method = isEditing ? "PUT" : "POST";
 
     const res = await fetch(url, {
