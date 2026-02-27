@@ -6,12 +6,15 @@ const options = {
     info: {
       title: "BookQuest API",
       version: "1.0.0",
-      description: "API do BookQuest — gerencie sua estante de livros com gamificação",
+      description:
+        "API do BookQuest — gerencie sua estante de livros com gamificação",
     },
     servers: [
       {
-        url: "http://localhost:5000",
-        description: "Servidor local",
+        url: process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : "http://localhost:5000",
+        description: process.env.VERCEL_URL ? "Produção" : "Servidor local",
       },
     ],
     components: {

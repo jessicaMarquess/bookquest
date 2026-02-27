@@ -19,7 +19,17 @@ const allowedOrigins = [
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: { url: "/api-docs/swagger.json" },
+  }),
+);
+
+app.get("/api-docs/swagger.json", (req, res) => {
+  res.json(swaggerSpec);
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
