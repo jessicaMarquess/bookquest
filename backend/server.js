@@ -1,9 +1,10 @@
+import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import cors from "cors";
 import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./config/swagger.js";
 import connectDB from "./config/db.js";
+import swaggerSpec from "./config/swagger.js";
+import Book from "./models/Book.js";
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/books.js";
 import profileRoutes from "./routes/profile.js";
@@ -38,7 +39,19 @@ app.use("/api/stats", statsRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
+async function migrateFinishedAt() {
+  const result = await Book.updateMany({ status: "lido", finishedAt: null }, [
+    { $set: { finishedAt: "$createdAt" } },
+  ]);
+  if (result.modifiedCount > 0) {
+    console.log(
+      `Migração: ${result.modifiedCount} livro(s) com finishedAt preenchido via createdAt`,
+    );
+  }
+}
+
+connectDB().then(async () => {
+  await migrateFinishedAt();
   app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 });
 

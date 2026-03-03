@@ -85,8 +85,11 @@ router.get("/", async (req, res) => {
  */
 router.post("/", async (req, res) => {
   try {
-    const { title, author, status, rating, genre, isReread } = req.body;
-    const book = await Book.create({ title, author, status, rating, genre, isReread, userId: req.userId });
+    const { title, author, status, rating, genre, isReread, finishedAt } = req.body;
+    const book = await Book.create({
+      title, author, status, rating, genre, isReread, userId: req.userId,
+      finishedAt: status === "lido" ? (finishedAt || null) : null,
+    });
 
     if (status === "lido") {
       await User.findByIdAndUpdate(req.userId, {
@@ -165,6 +168,11 @@ router.put("/:id", async (req, res) => {
     if (req.body.rating !== undefined) book.rating = req.body.rating;
     if (req.body.genre !== undefined) book.genre = req.body.genre;
     if (req.body.isReread !== undefined) book.isReread = req.body.isReread;
+    if (newStatus === "lido") {
+      book.finishedAt = req.body.finishedAt || book.finishedAt || null;
+    } else {
+      book.finishedAt = null;
+    }
     await book.save();
 
     if (oldStatus !== "lido" && newStatus === "lido") {

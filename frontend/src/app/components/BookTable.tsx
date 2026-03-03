@@ -1,5 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -8,20 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { API_URL } from "@/lib/api";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   EllipsisVerticalIcon,
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { useMemo, useState } from "react";
-import { API_URL } from "@/lib/api";
 
 interface Book {
   _id: string;
@@ -32,6 +33,7 @@ interface Book {
   rating?: number | null;
   isReread?: boolean;
   createdAt?: string;
+  finishedAt?: string | null;
 }
 
 interface BookTableProps {
@@ -41,7 +43,12 @@ interface BookTableProps {
   onEdit: (book: Book) => void;
 }
 
-export default function BookTable({ books, token, onUpdate, onEdit }: BookTableProps) {
+export default function BookTable({
+  books,
+  token,
+  onUpdate,
+  onEdit,
+}: BookTableProps) {
   const [filterTitle, setFilterTitle] = useState("");
   const [filterAuthor, setFilterAuthor] = useState("");
   const [filterGenre, setFilterGenre] = useState("");
@@ -76,13 +83,17 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
   }, [books, filterTitle, filterAuthor, filterGenre, filterStatus, filterDate]);
 
   async function handleStatusChange(bookId: string, newStatus: string) {
+    const body: Record<string, unknown> = { status: newStatus };
+    if (newStatus === "lido") {
+      body.finishedAt = new Date().toISOString().split("T")[0];
+    }
     await fetch(`${API_URL}/api/books/${bookId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ status: newStatus }),
+      body: JSON.stringify(body),
     });
     onUpdate();
   }
@@ -142,11 +153,11 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
               <SelectItem value="lido">Lido</SelectItem>
             </SelectContent>
           </Select>
-          <Input
-            type="date"
+          <DatePicker
             value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="h-8 text-sm bg-gray-900 md:w-40 md:shrink-0 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
+            onChange={setFilterDate}
+            placeholder="Filtrar por data"
+            className="h-8 bg-gray-900 md:w-40 md:shrink-0"
           />
           {hasFilters && (
             <Button
@@ -177,7 +188,7 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
               <th className="px-4 py-3 font-medium">Genero</th>
               <th className="px-4 py-3 font-medium text-center">Nota</th>
               <th className="px-4 py-3 font-medium text-center">Releitura</th>
-              <th className="px-4 py-3 font-medium">Adicionado em</th>
+              <th className="px-4 py-3 font-medium">Concluído em</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium w-10"></th>
             </tr>
@@ -203,7 +214,7 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
                   )}
                 </td>
                 <td className="px-4 py-3 text-gray-400">
-                  {formatDate(book.createdAt)}
+                  {book.finishedAt ? formatDate(book.finishedAt) : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <Select
@@ -248,7 +259,7 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
             ))}
             {filteredBooks.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-6 text-center text-gray-500">
+                <td colSpan={9} className="px-4 py-6 text-center text-gray-500">
                   Nenhum livro encontrado com esses filtros.
                 </td>
               </tr>
@@ -298,6 +309,9 @@ export default function BookTable({ books, token, onUpdate, onEdit }: BookTableP
                 </span>
               )}
               <span>{formatDate(book.createdAt)}</span>
+              {book.finishedAt && (
+                <span>Concluído: {formatDate(book.finishedAt)}</span>
+              )}
             </div>
             <Select
               value={book.status}

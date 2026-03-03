@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { API_URL } from "@/lib/api";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface Book {
   _id: string;
@@ -20,6 +21,7 @@ interface Book {
   genre?: string;
   rating?: number | null;
   isReread?: boolean;
+  finishedAt?: string | null;
 }
 
 interface BookFormProps {
@@ -43,6 +45,9 @@ export default function BookForm({
   );
   const [status, setStatus] = useState(editBook?.status ?? "quero_ler");
   const [isReread, setIsReread] = useState(editBook?.isReread ?? false);
+  const [finishedAt, setFinishedAt] = useState(
+    editBook?.finishedAt ? new Date(editBook.finishedAt).toISOString().split("T")[0] : "",
+  );
 
   const isEditing = !!editBook;
 
@@ -64,6 +69,7 @@ export default function BookForm({
         genre,
         rating: rating !== "" ? Number(rating) : null,
         isReread,
+        finishedAt: status === "lido" && finishedAt ? finishedAt : null,
       }),
     });
 
@@ -113,6 +119,13 @@ export default function BookForm({
           </SelectContent>
         </Select>
       </div>
+      {status === "lido" && (
+        <DatePicker
+          value={finishedAt}
+          onChange={setFinishedAt}
+          placeholder="Data de conclusão"
+        />
+      )}
       <div className="flex items-center gap-2">
         <Checkbox
           id="isReread"
