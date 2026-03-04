@@ -1,8 +1,8 @@
 "use client";
+import { API_URL } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import { API_URL } from "@/lib/api";
 
 interface Stats {
   totalBooks: number;
@@ -116,7 +116,7 @@ export default function StatsPage() {
             </p>
           </div>
           <div className="bg-gray-900 rounded-xl p-5">
-            <p className="text-gray-400 text-sm">Genero mais lido</p>
+            <p className="text-gray-400 text-sm">Gênero mais lido</p>
             <p className="text-3xl font-bold font-mono mt-1 text-pink-400">
               {topGenre ? topGenre.genre : "—"}
             </p>
@@ -127,7 +127,7 @@ export default function StatsPage() {
             )}
           </div>
           <div className="bg-gray-900 rounded-xl p-5">
-            <p className="text-gray-400 text-sm">Mes mais lido</p>
+            <p className="text-gray-400 text-sm">Mês mais lido</p>
             <p className="text-3xl font-bold font-mono mt-1 text-pink-400">
               {topMonth.month ? formatMonth(topMonth.month) : "—"}
             </p>
@@ -152,7 +152,7 @@ export default function StatsPage() {
           {/* Top gêneros */}
           <div className="bg-gray-900 rounded-xl p-5 space-y-3">
             <p className="text-gray-400 text-sm font-medium">
-              Livros lidos por genero
+              Livros lidos por gênero
             </p>
             {stats.topGenres.length === 0 && (
               <p className="text-gray-500 text-sm">Nenhum livro lido ainda.</p>
@@ -176,7 +176,7 @@ export default function StatsPage() {
           {/* Leituras por mês */}
           <div className="bg-gray-900 rounded-xl p-5 space-y-3">
             <p className="text-gray-400 text-sm font-medium">
-              Livros lidos por mes
+              Livros lidos por mês
             </p>
             {stats.monthlyReads.length === 0 && (
               <p className="text-gray-500 text-sm">Nenhum livro lido ainda.</p>

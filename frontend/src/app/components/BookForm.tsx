@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,9 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 import { API_URL } from "@/lib/api";
-import { DatePicker } from "@/components/ui/date-picker";
+import { STATUS_LABELS } from "@/lib/constants";
+import { useState } from "react";
 
 interface Book {
   _id: string;
@@ -46,14 +47,18 @@ export default function BookForm({
   const [status, setStatus] = useState(editBook?.status ?? "quero_ler");
   const [isReread, setIsReread] = useState(editBook?.isReread ?? false);
   const [finishedAt, setFinishedAt] = useState(
-    editBook?.finishedAt ? new Date(editBook.finishedAt).toISOString().split("T")[0] : "",
+    editBook?.finishedAt
+      ? new Date(editBook.finishedAt).toISOString().split("T")[0]
+      : "",
   );
 
   const isEditing = !!editBook;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const url = isEditing ? `${API_URL}/api/books/${editBook._id}` : `${API_URL}/api/books`;
+    const url = isEditing
+      ? `${API_URL}/api/books/${editBook._id}`
+      : `${API_URL}/api/books`;
     const method = isEditing ? "PUT" : "POST";
 
     const res = await fetch(url, {
@@ -113,9 +118,11 @@ export default function BookForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="quero_ler">Quero ler</SelectItem>
-            <SelectItem value="lendo">Lendo</SelectItem>
-            <SelectItem value="lido">Lido</SelectItem>
+            {Object.entries(STATUS_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { API_URL } from "@/lib/api";
-import { DatePicker } from "@/components/ui/date-picker";
+import { status, STATUS_LABELS } from "@/lib/constants";
 import {
   EllipsisVerticalIcon,
   PencilSquareIcon,
@@ -72,7 +73,7 @@ export default function BookTable({
         !(book.genre || "").toLowerCase().includes(filterGenre.toLowerCase())
       )
         return false;
-      if (filterStatus !== "todos" && book.status !== filterStatus)
+      if (filterStatus !== status.TODOS && book.status !== filterStatus)
         return false;
       if (filterDate && book.createdAt) {
         const bookDate = new Date(book.createdAt).toISOString().split("T")[0];
@@ -120,7 +121,6 @@ export default function BookTable({
 
   return (
     <div className="space-y-6">
-      {/* Filtros */}
       <div className="space-y-2">
         <h1 className="font-mono text-gray-300">Filtros: </h1>
         <div className="grid grid-cols-2 gap-2 border p-4 rounded-xl md:flex md:items-end">
@@ -217,19 +217,7 @@ export default function BookTable({
                   {book.finishedAt ? formatDate(book.finishedAt) : "—"}
                 </td>
                 <td className="px-4 py-3">
-                  <Select
-                    value={book.status}
-                    onValueChange={(v) => handleStatusChange(book._id, v)}
-                  >
-                    <SelectTrigger className="w-[130px] h-8 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="quero_ler">Quero ler</SelectItem>
-                      <SelectItem value="lendo">Lendo</SelectItem>
-                      <SelectItem value="lido">Lido</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {STATUS_LABELS[book.status] ?? book.status}
                 </td>
                 <td className="px-4 py-3">
                   <DropdownMenu>
@@ -239,7 +227,7 @@ export default function BookTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {book.status === "lendo" && (
+                      {book.status === status.LENDO && (
                         <DropdownMenuItem onClick={() => onEdit(book)}>
                           <PencilSquareIcon className="w-4 h-4 mr-2" />
                           Editar
@@ -284,7 +272,7 @@ export default function BookTable({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {book.status === "lendo" && (
+                  {book.status === status.LENDO && (
                     <DropdownMenuItem onClick={() => onEdit(book)}>
                       <PencilSquareIcon className="w-4 h-4 mr-2" />
                       Editar
@@ -321,9 +309,11 @@ export default function BookTable({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="quero_ler">Quero ler</SelectItem>
-                <SelectItem value="lendo">Lendo</SelectItem>
-                <SelectItem value="lido">Lido</SelectItem>
+                {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
