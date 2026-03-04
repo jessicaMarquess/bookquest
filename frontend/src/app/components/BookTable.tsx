@@ -301,21 +301,9 @@ export default function BookTable({
                 <span>Concluído: {formatDate(book.finishedAt)}</span>
               )}
             </div>
-            <Select
-              value={book.status}
-              onValueChange={(v) => handleStatusChange(book._id, v)}
-            >
-              <SelectTrigger className="w-full h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <p className="text-pink-400 text-sm font-mono">
+              {STATUS_LABELS[book.status] ?? book.status}
+            </p>
           </div>
         ))}
         {filteredBooks.length === 0 && (
