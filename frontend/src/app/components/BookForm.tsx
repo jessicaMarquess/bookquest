@@ -146,7 +146,11 @@ export default function BookForm({
           Releitura
         </label>
       </div>
-      <Button type="submit" className="w-full bg-pink-400 hover:bg-pink-500">
+      <Button
+        type="submit"
+        className="w-full bg-pink-400 hover:bg-pink-500"
+        disabled={status === "lido" && (!finishedAt || rating === "")}
+      >
         {isEditing ? "Salvar" : "Adicionar"}
       </Button>
     </form>
