@@ -42,11 +42,11 @@ export default function BookForm({
   const [titleSuggestions, setTitleSuggestions] = useState<{ title: string; author: string }[]>([]);
   const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
   const titleRef = useRef<HTMLDivElement>(null);
-  const skipTitleFetch = useRef(false);
+  const skipTitleFetch = useRef(!!editBook);
   const [author, setAuthor] = useState(editBook?.author ?? "");
   const [authorSuggestions, setAuthorSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const skipAuthorFetch = useRef(false);
+  const skipAuthorFetch = useRef(!!editBook);
   const authorRef = useRef<HTMLDivElement>(null);
   const [genre, setGenre] = useState(editBook?.genre ?? "");
   const [rating, setRating] = useState(
