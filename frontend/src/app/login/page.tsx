@@ -10,11 +10,13 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
@@ -23,7 +25,11 @@ export default function Login() {
     });
 
     const data = await res.json();
-    if (!res.ok) return setError(data.error);
+    if (!res.ok) {
+      setError(data.error);
+      setLoading(false);
+      return;
+    }
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
@@ -31,7 +37,7 @@ export default function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen px-4">
       <form
         onSubmit={handleSubmit}
         className="bg-gray-900 p-8 rounded-2xl w-full max-w-sm space-y-4"
@@ -55,8 +61,16 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <Button type="submit" className="w-full bg-pink-400 hover:bg-pink-500">
-          Entrar
+        <Button type="submit" disabled={loading} className="w-full bg-pink-400 hover:bg-pink-500 disabled:opacity-70">
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+              </svg>
+              Entrando...
+            </span>
+          ) : "Entrar"}
         </Button>
         <p className="text-center text-sm text-gray-400">
           Não tem conta?{" "}

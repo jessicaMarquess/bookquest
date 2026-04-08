@@ -1,19 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import MobileHeader from "../components/MobileHeader";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import BookForm from "../components/BookForm";
+import AppSidebar from "../components/AppSidebar";
+import BookFormModal from "../components/BookFormModal";
 import BookTable from "../components/BookTable";
 import LevelBar from "../components/LevelBar";
-import Navbar from "../components/Navbar";
 import { API_URL } from "@/lib/api";
 
 interface Profile {
@@ -88,66 +83,52 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar userName={user?.name ?? ""} />
-      <main className="max-w-6xl mx-auto space-y-6 mt-4 px-4 pb-8">
-        <LevelBar profile={profile} />
+    <SidebarProvider defaultOpen={false}>
+      <AppSidebar userName={user?.name ?? ""} />
+      <SidebarInset>
+        <MobileHeader />
+        <main className="max-w-6xl mx-auto space-y-6 px-6 py-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <LevelBar profile={profile} />
 
-        <Dialog open={showForm} onOpenChange={setShowForm}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar livro</DialogTitle>
-              <DialogDescription>Preencha os dados do livro</DialogDescription>
-            </DialogHeader>
-            <BookForm
-              token={token}
-              onBookAdded={loadData}
-              onClose={() => setShowForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+          <BookFormModal
+            open={showForm}
+            onOpenChange={setShowForm}
+            token={token}
+            onBookAdded={loadData}
+          />
 
-        <Dialog open={!!editingBook} onOpenChange={(open) => !open && setEditingBook(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Editar livro</DialogTitle>
-              <DialogDescription>Altere os dados do livro</DialogDescription>
-            </DialogHeader>
-            {editingBook && (
-              <BookForm
-                key={editingBook._id}
-                token={token}
-                onBookAdded={loadData}
-                onClose={() => setEditingBook(null)}
-                editBook={editingBook}
-              />
+          <BookFormModal
+            open={!!editingBook}
+            onOpenChange={(open) => !open && setEditingBook(null)}
+            token={token}
+            onBookAdded={loadData}
+            editBook={editingBook}
+          />
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-xl font-mono">
+                Meus livros ({books.length})
+              </h2>
+              <Button
+                size="icon"
+                onClick={() => setShowForm(true)}
+                className="rounded-full bg-pink-400 hover:bg-pink-400/80"
+                title="Adicionar livro"
+              >
+                <PlusIcon className="w-5 h-5" />
+              </Button>
+            </div>
+            {books.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                Nenhum livro cadastrado ainda.
+              </p>
+            ) : (
+              <BookTable books={books} token={token} onUpdate={loadData} onEdit={setEditingBook} />
             )}
-          </DialogContent>
-        </Dialog>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-xl font-mono">
-              Meus livros ({books.length})
-            </h2>
-            <Button
-              size="icon"
-              onClick={() => setShowForm(true)}
-              className="rounded-full bg-pink-400 hover:bg-pink-400/80"
-              title="Adicionar livro"
-            >
-              <PlusIcon className="w-5 h-5" />
-            </Button>
           </div>
-          {books.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              Nenhum livro cadastrado ainda.
-            </p>
-          ) : (
-            <BookTable books={books} token={token} onUpdate={loadData} onEdit={setEditingBook} />
-          )}
-        </div>
-      </main>
-    </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

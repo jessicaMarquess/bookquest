@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { API_URL } from "@/lib/api";
-import { STATUS_LABELS } from "@/lib/constants";
-import { useState } from "react";
+import { GENRE_OPTIONS, STATUS_LABELS } from "@/lib/constants";
+import { useEffect, useRef, useState } from "react";
 
 interface Book {
   _id: string;
@@ -39,7 +39,15 @@ export default function BookForm({
   editBook,
 }: BookFormProps) {
   const [title, setTitle] = useState(editBook?.title ?? "");
+  const [titleSuggestions, setTitleSuggestions] = useState<{ title: string; author: string }[]>([]);
+  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const skipTitleFetch = useRef(false);
   const [author, setAuthor] = useState(editBook?.author ?? "");
+  const [authorSuggestions, setAuthorSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const skipAuthorFetch = useRef(false);
+  const authorRef = useRef<HTMLDivElement>(null);
   const [genre, setGenre] = useState(editBook?.genre ?? "");
   const [rating, setRating] = useState(
     editBook?.rating != null ? String(editBook.rating) : "",
@@ -51,6 +59,71 @@ export default function BookForm({
       ? new Date(editBook.finishedAt).toISOString().split("T")[0]
       : "",
   );
+
+  useEffect(() => {
+    if (skipTitleFetch.current) {
+      skipTitleFetch.current = false;
+      return;
+    }
+    if (title.length < 2) {
+      setTitleSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=5&language=por`,
+        );
+        const data = await res.json();
+        const suggestions = data.docs?.map((d: { title: string; author_name?: string[] }) => ({
+          title: d.title,
+          author: d.author_name?.[0] ?? "",
+        })) ?? [];
+        setTitleSuggestions(suggestions);
+        setShowTitleSuggestions(true);
+      } catch {
+        setTitleSuggestions([]);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [title]);
+
+  useEffect(() => {
+    if (skipAuthorFetch.current) {
+      skipAuthorFetch.current = false;
+      return;
+    }
+    if (author.length < 2) {
+      setAuthorSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://openlibrary.org/search/authors.json?q=${encodeURIComponent(author)}&limit=5`,
+        );
+        const data = await res.json();
+        setAuthorSuggestions(data.docs?.map((d: { name: string }) => d.name) ?? []);
+        setShowSuggestions(true);
+      } catch {
+        setAuthorSuggestions([]);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [author]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (titleRef.current && !titleRef.current.contains(e.target as Node)) {
+        setShowTitleSuggestions(false);
+      }
+      if (authorRef.current && !authorRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const isEditing = !!editBook;
 
@@ -85,25 +158,87 @@ export default function BookForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <Input
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
-      <Input
-        placeholder="Autor"
-        value={author}
-        onChange={(e) => setAuthor(e.target.value)}
-        required
-      />
-      <Input
-        placeholder="Gênero"
-        value={genre}
-        onChange={(e) => setGenre(e.target.value)}
-      />
-      <div className="flex gap-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div ref={titleRef} className="relative">
+        <Input
+          className="h-12 text-base sm:h-9 sm:text-sm"
+          placeholder="Título"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setShowTitleSuggestions(true);
+          }}
+          onFocus={() => titleSuggestions.length > 0 && setShowTitleSuggestions(true)}
+          required
+        />
+        {showTitleSuggestions && titleSuggestions.length > 0 && (
+          <ul className="absolute z-50 w-full mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
+            {titleSuggestions.map((item) => (
+              <li
+                key={item.title + item.author}
+                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                onMouseDown={() => {
+                  skipTitleFetch.current = true;
+                  if (item.author) skipAuthorFetch.current = true;
+                  setTitle(item.title);
+                  if (item.author) setAuthor(item.author);
+                  setTitleSuggestions([]);
+                  setShowTitleSuggestions(false);
+                }}
+              >
+                <span>{item.title}</span>
+                {item.author && (
+                  <span className="text-muted-foreground ml-2">— {item.author}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div ref={authorRef} className="relative">
+        <Input
+          className="h-12 text-base sm:h-9 sm:text-sm"
+          placeholder="Autor"
+          value={author}
+          onChange={(e) => {
+            setAuthor(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => authorSuggestions.length > 0 && setShowSuggestions(true)}
+          required
+        />
+        {showSuggestions && authorSuggestions.length > 0 && (
+          <ul className="absolute z-50 w-full mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
+            {authorSuggestions.map((name) => (
+              <li
+                key={name}
+                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                onMouseDown={() => {
+                  skipAuthorFetch.current = true;
+                  setAuthor(name);
+                  setAuthorSuggestions([]);
+                  setShowSuggestions(false);
+                }}
+              >
+                {name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <Select value={genre} onValueChange={setGenre}>
+        <SelectTrigger className="h-12 text-base sm:h-9 sm:text-sm">
+          <SelectValue placeholder="Gênero" />
+        </SelectTrigger>
+        <SelectContent side="bottom" align="start" position="popper">
+          {GENRE_OPTIONS.map((g) => (
+            <SelectItem key={g} value={g}>
+              {g}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="flex flex-col gap-3 sm:flex-row">
         <Input
           type="number"
           placeholder="Nota (0-10)"
@@ -111,10 +246,10 @@ export default function BookForm({
           onChange={(e) => setRating(e.target.value)}
           min={0}
           max={10}
-          className="flex-1"
+          className="h-12 text-base sm:h-9 sm:text-sm sm:flex-1"
         />
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="flex-1">
+          <SelectTrigger className="h-12 text-base sm:h-9 sm:text-sm sm:flex-1">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

@@ -1,8 +1,10 @@
 "use client";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { API_URL } from "@/lib/api";
+import MobileHeader from "../components/MobileHeader";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import AppSidebar from "../components/AppSidebar";
 
 interface Stats {
   totalBooks: number;
@@ -82,9 +84,11 @@ export default function StatsPage() {
   const maxGenreCount = Math.max(...stats.topGenres.map((g) => g.count), 1);
 
   return (
-    <div className="min-h-screen">
-      <Navbar userName={user?.name ?? ""} />
-      <main className="max-w-6xl mx-auto space-y-6 mt-4 px-4 pb-8">
+    <SidebarProvider defaultOpen={false}>
+      <AppSidebar userName={user?.name ?? ""} />
+      <SidebarInset>
+        <MobileHeader />
+        <main className="max-w-6xl mx-auto space-y-6 px-6 py-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         <h1 className="text-2xl font-bold font-mono">Estatisticas</h1>
 
         {/* Resumo */}
@@ -107,17 +111,17 @@ export default function StatsPage() {
           />
         </div>
 
-        {/* Destaques */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="bg-gray-900 rounded-xl p-5">
-            <p className="text-gray-400 text-sm">Nota media</p>
-            <p className="text-3xl font-bold font-mono mt-1">
+        {/* Destaques + Releituras */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
+            <p className="text-gray-400 text-xs md:text-sm">Nota média</p>
+            <p className="text-xl md:text-2xl font-bold font-mono mt-1">
               {stats.averageRating > 0 ? `${stats.averageRating}/10` : "—"}
             </p>
           </div>
-          <div className="bg-gray-900 rounded-xl p-5">
-            <p className="text-gray-400 text-sm">Gênero mais lido</p>
-            <p className="text-3xl font-bold font-mono mt-1 text-pink-400">
+          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
+            <p className="text-gray-400 text-xs md:text-sm">Gênero mais lido</p>
+            <p className="text-xl md:text-2xl font-bold font-mono mt-1 text-pink-400 truncate">
               {topGenre ? topGenre.genre : "—"}
             </p>
             {topGenre && (
@@ -126,9 +130,9 @@ export default function StatsPage() {
               </p>
             )}
           </div>
-          <div className="bg-gray-900 rounded-xl p-5">
-            <p className="text-gray-400 text-sm">Mês mais lido</p>
-            <p className="text-3xl font-bold font-mono mt-1 text-pink-400">
+          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
+            <p className="text-gray-400 text-xs md:text-sm">Mês mais lido</p>
+            <p className="text-xl md:text-2xl font-bold font-mono mt-1 text-pink-400">
               {topMonth.month ? formatMonth(topMonth.month) : "—"}
             </p>
             {topMonth.count > 0 && (
@@ -137,14 +141,12 @@ export default function StatsPage() {
               </p>
             )}
           </div>
-        </div>
-
-        {/* Releituras */}
-        <div className="bg-gray-900 rounded-xl p-5 inline-block">
-          <p className="text-gray-400 text-sm">Releituras</p>
-          <p className="text-3xl font-bold font-mono mt-1">
-            {stats.totalRereads}
-          </p>
+          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
+            <p className="text-gray-400 text-xs md:text-sm">Releituras</p>
+            <p className="text-xl md:text-2xl font-bold font-mono mt-1">
+              {stats.totalRereads}
+            </p>
+          </div>
         </div>
 
         {/* Gêneros e Meses lado a lado */}
@@ -197,8 +199,9 @@ export default function StatsPage() {
             ))}
           </div>
         </div>
-      </main>
-    </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
@@ -212,9 +215,9 @@ function StatCard({
   color?: string;
 }) {
   return (
-    <div className="bg-gray-900 rounded-xl p-4">
+    <div className="bg-gray-900 rounded-xl p-3 md:p-4">
       <p className="text-gray-400 text-xs">{label}</p>
-      <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
+      <p className={`text-xl md:text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
     </div>
   );
 }

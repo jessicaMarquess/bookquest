@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { API_URL } from "@/lib/api";
-import { status, STATUS_LABELS } from "@/lib/constants";
+import { GENRE_OPTIONS, status, STATUS_LABELS } from "@/lib/constants";
 import {
   EllipsisVerticalIcon,
   PencilSquareIcon,
@@ -24,6 +24,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { useMemo, useState } from "react";
+import type { DateRange } from "react-day-picker";
 
 interface Book {
   _id: string;
@@ -54,7 +55,7 @@ export default function BookTable({
   const [filterAuthor, setFilterAuthor] = useState("");
   const [filterGenre, setFilterGenre] = useState("");
   const [filterStatus, setFilterStatus] = useState("todos");
-  const [filterDate, setFilterDate] = useState("");
+  const [filterDateRange, setFilterDateRange] = useState<DateRange | undefined>(undefined);
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => {
@@ -75,13 +76,17 @@ export default function BookTable({
         return false;
       if (filterStatus !== status.TODOS && book.status !== filterStatus)
         return false;
-      if (filterDate && book.createdAt) {
-        const bookDate = new Date(book.createdAt).toISOString().split("T")[0];
-        if (bookDate !== filterDate) return false;
+      if (filterDateRange?.from && book.createdAt) {
+        const bookDate = new Date(book.createdAt);
+        const from = new Date(filterDateRange.from);
+        from.setHours(0, 0, 0, 0);
+        const to = filterDateRange.to ? new Date(filterDateRange.to) : new Date(filterDateRange.from);
+        to.setHours(23, 59, 59, 999);
+        if (bookDate < from || bookDate > to) return false;
       }
       return true;
     });
-  }, [books, filterTitle, filterAuthor, filterGenre, filterStatus, filterDate]);
+  }, [books, filterTitle, filterAuthor, filterGenre, filterStatus, filterDateRange]);
 
   async function handleStatusChange(bookId: string, newStatus: string) {
     const body: Record<string, unknown> = { status: newStatus };
@@ -117,33 +122,56 @@ export default function BookTable({
     filterAuthor ||
     filterGenre ||
     filterStatus !== "todos" ||
-    filterDate;
+    filterDateRange?.from;
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="font-mono text-gray-300">Filtros: </h1>
-        <div className="grid grid-cols-2 gap-2 border p-4 rounded-xl md:flex md:items-end">
+        <div className="flex items-center justify-between">
+          <h1 className="font-mono text-gray-300">Filtros:</h1>
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs text-gray-400 hover:text-white"
+              onClick={() => {
+                setFilterTitle("");
+                setFilterAuthor("");
+                setFilterGenre("");
+                setFilterStatus("todos");
+                setFilterDateRange(undefined);
+              }}
+            >
+              Limpar filtros
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-col gap-3 border p-4 rounded-xl md:flex-row md:items-end md:flex-wrap md:gap-2">
           <Input
             placeholder="Titulo"
             value={filterTitle}
             onChange={(e) => setFilterTitle(e.target.value)}
-            className="col-span-2 md:flex-[3] md:min-w-0 h-8 text-sm bg-gray-900"
+            className="h-12 text-base bg-gray-900 md:h-8 md:text-sm md:flex-[3] md:min-w-0"
           />
           <Input
             placeholder="Autor"
             value={filterAuthor}
             onChange={(e) => setFilterAuthor(e.target.value)}
-            className="md:flex-[2] md:min-w-0 h-8 text-sm bg-gray-900"
+            className="h-12 text-base bg-gray-900 md:h-8 md:text-sm md:flex-[2] md:min-w-0"
           />
-          <Input
-            placeholder="Genero"
-            value={filterGenre}
-            onChange={(e) => setFilterGenre(e.target.value)}
-            className="md:flex-[2] md:min-w-0 h-8 text-sm bg-gray-900"
-          />
+          <Select value={filterGenre || "todos"} onValueChange={(v) => setFilterGenre(v === "todos" ? "" : v)}>
+            <SelectTrigger className="h-12 text-base bg-gray-900 md:h-8 md:text-sm md:flex-[2] md:min-w-0">
+              <SelectValue placeholder="Gênero" />
+            </SelectTrigger>
+            <SelectContent side="bottom" align="start" position="popper">
+              <SelectItem value="todos">Todos os gêneros</SelectItem>
+              {GENRE_OPTIONS.map((g) => (
+                <SelectItem key={g} value={g}>{g}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="h-8 text-sm bg-gray-900 md:w-[130px] md:shrink-0">
+            <SelectTrigger className="h-12 text-base bg-gray-900 md:h-8 md:text-sm md:w-[130px] md:shrink-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -153,28 +181,12 @@ export default function BookTable({
               <SelectItem value="lido">Lido</SelectItem>
             </SelectContent>
           </Select>
-          <DatePicker
-            value={filterDate}
-            onChange={setFilterDate}
-            placeholder="Filtrar por data"
-            className="h-8 bg-gray-900 md:w-40 md:shrink-0"
+          <DateRangePicker
+            value={filterDateRange}
+            onChange={setFilterDateRange}
+            placeholder="Filtrar por período"
+            className="h-12 bg-gray-900 md:h-8 md:w-52 md:shrink-0"
           />
-          {hasFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="col-span-2 h-8 text-xs text-gray-400 hover:text-white"
-              onClick={() => {
-                setFilterTitle("");
-                setFilterAuthor("");
-                setFilterGenre("");
-                setFilterStatus("todos");
-                setFilterDate("");
-              }}
-            >
-              Limpar filtros
-            </Button>
-          )}
         </div>
       </div>
 
@@ -227,7 +239,7 @@ export default function BookTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {book.status === status.LENDO && (
+                      {book.status !== status.LIDO && (
                         <DropdownMenuItem onClick={() => onEdit(book)}>
                           <PencilSquareIcon className="w-4 h-4 mr-2" />
                           Editar
@@ -272,7 +284,7 @@ export default function BookTable({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {book.status === status.LENDO && (
+                  {book.status !== status.LIDO && (
                     <DropdownMenuItem onClick={() => onEdit(book)}>
                       <PencilSquareIcon className="w-4 h-4 mr-2" />
                       Editar
