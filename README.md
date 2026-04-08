@@ -12,9 +12,13 @@ Plataforma de rastreamento de leituras com sistema de gamificação. Acompanhe s
 - **Estante de livros** — organize seus livros por status: Quero ler, Lendo e Lido
 - **Gamificação** — ganhe 100 XP por livro lido e suba de nível
 - **Estatísticas** — visualize gêneros mais lidos, meses mais produtivos e média de notas
-- **Filtros** — busque por título, autor, gênero, status e data
+- **Filtros** — busque por título, autor, gênero (select), status e período (intervalo de datas)
 - **Releituras** — marque livros que você leu mais de uma vez
-- **Responsivo** — funciona em desktop e mobile
+- **Autocomplete de livros e autores** — busca integrada com a Open Library ao adicionar/editar livros
+- **Gêneros predefinidos** — select com categorias literárias em vez de texto livre
+- **Sidebar responsiva** — navegação lateral colapsável com ícones no desktop; menu hambúrguer no mobile
+- **Bottom sheet no mobile** — formulário de adicionar/editar livros abre como sheet deslizante em telas pequenas
+- **Responsivo** — layout e inputs adaptados para desktop e mobile
 
 ## Stack
 
@@ -39,13 +43,15 @@ bookquest/
 ├── frontend/
 │   └── src/
 │       ├── app/
-│       │   ├── components/   # BookTable, BookForm, Navbar, LevelBar
+│       │   ├── components/   # AppSidebar, BookTable, BookForm, BookFormModal
+│       │   │                 # MobileHeader, LevelBar
 │       │   ├── dashboard/
 │       │   ├── login/
 │       │   ├── register/
 │       │   └── stats/
-│       ├── components/ui/    # shadcn/ui
-│       └── lib/
+│       ├── components/ui/    # shadcn/ui (sidebar, drawer, date-range-picker…)
+│       ├── hooks/            # use-mobile
+│       └── lib/              # constants (GENRE_OPTIONS, STATUS_LABELS)
 └── docker-compose.yml
 ```
 
