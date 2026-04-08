@@ -55,7 +55,9 @@ export default function BookTable({
   const [filterAuthor, setFilterAuthor] = useState("");
   const [filterGenre, setFilterGenre] = useState("");
   const [filterStatus, setFilterStatus] = useState("todos");
-  const [filterDateRange, setFilterDateRange] = useState<DateRange | undefined>(undefined);
+  const [filterDateRange, setFilterDateRange] = useState<DateRange | undefined>(
+    undefined,
+  );
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => {
@@ -80,29 +82,22 @@ export default function BookTable({
         const bookDate = new Date(book.createdAt);
         const from = new Date(filterDateRange.from);
         from.setHours(0, 0, 0, 0);
-        const to = filterDateRange.to ? new Date(filterDateRange.to) : new Date(filterDateRange.from);
+        const to = filterDateRange.to
+          ? new Date(filterDateRange.to)
+          : new Date(filterDateRange.from);
         to.setHours(23, 59, 59, 999);
         if (bookDate < from || bookDate > to) return false;
       }
       return true;
     });
-  }, [books, filterTitle, filterAuthor, filterGenre, filterStatus, filterDateRange]);
-
-  async function handleStatusChange(bookId: string, newStatus: string) {
-    const body: Record<string, unknown> = { status: newStatus };
-    if (newStatus === "lido") {
-      body.finishedAt = new Date().toISOString().split("T")[0];
-    }
-    await fetch(`${API_URL}/api/books/${bookId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-    onUpdate();
-  }
+  }, [
+    books,
+    filterTitle,
+    filterAuthor,
+    filterGenre,
+    filterStatus,
+    filterDateRange,
+  ]);
 
   async function handleDelete(bookId: string) {
     await fetch(`${API_URL}/api/books/${bookId}`, {
@@ -159,14 +154,19 @@ export default function BookTable({
             onChange={(e) => setFilterAuthor(e.target.value)}
             className="h-12 text-base bg-gray-900 md:h-8 md:text-sm md:flex-[2] md:min-w-0"
           />
-          <Select value={filterGenre || "todos"} onValueChange={(v) => setFilterGenre(v === "todos" ? "" : v)}>
+          <Select
+            value={filterGenre || "todos"}
+            onValueChange={(v) => setFilterGenre(v === "todos" ? "" : v)}
+          >
             <SelectTrigger className="h-12 text-base bg-gray-900 md:h-8 md:text-sm md:flex-[2] md:min-w-0">
               <SelectValue placeholder="Gênero" />
             </SelectTrigger>
             <SelectContent side="bottom" align="start" position="popper">
               <SelectItem value="todos">Todos os gêneros</SelectItem>
               {GENRE_OPTIONS.map((g) => (
-                <SelectItem key={g} value={g}>{g}</SelectItem>
+                <SelectItem key={g} value={g}>
+                  {g}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -194,15 +194,15 @@ export default function BookTable({
       <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-800">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-900 text-gray-300 text-left font-mono">
-              <th className="px-4 py-3 font-medium">Titulo</th>
-              <th className="px-4 py-3 font-medium">Autor</th>
-              <th className="px-4 py-3 font-medium">Genero</th>
-              <th className="px-4 py-3 font-medium text-center">Nota</th>
-              <th className="px-4 py-3 font-medium text-center">Releitura</th>
-              <th className="px-4 py-3 font-medium">Concluído em</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium w-10"></th>
+            <tr className="bg-pink-400 text-gray-300 text-left font-mono">
+              <th className="px-4 py-3 font-bold">Titulo</th>
+              <th className="px-4 py-3 font-bold">Autor</th>
+              <th className="px-4 py-3 font-bold">Genero</th>
+              <th className="px-4 py-3 font-bold text-center">Nota</th>
+              <th className="px-4 py-3 font-bold text-center">Releitura</th>
+              <th className="px-4 py-3 font-bold">Concluído em</th>
+              <th className="px-4 py-3 font-bold">Status</th>
+              <th className="px-4 py-3 font-bold w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">

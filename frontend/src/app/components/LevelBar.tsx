@@ -11,7 +11,7 @@ export default function LevelBar({ profile }: { profile: Profile }) {
   const progress = profile.xpProgress;
 
   return (
-    <div className="bg-gray-900 rounded-2xl p-6 space-y-3">
+    <div className="bg-background border border-gray-900 rounded-2xl p-6 space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-2xl font-bold font-mono">Nível {profile.level}</p>

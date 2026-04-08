@@ -1,10 +1,10 @@
 "use client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { API_URL } from "@/lib/api";
-import MobileHeader from "../components/MobileHeader";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AppSidebar from "../components/AppSidebar";
+import MobileHeader from "../components/MobileHeader";
 
 interface Stats {
   totalBooks: number;
@@ -89,116 +89,122 @@ export default function StatsPage() {
       <SidebarInset>
         <MobileHeader />
         <main className="max-w-6xl mx-auto space-y-6 px-6 py-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <h1 className="text-2xl font-bold font-mono">Estatisticas</h1>
+          <h1 className="text-2xl font-bold font-mono">Estatisticas</h1>
 
-        {/* Resumo */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Total de livros" value={stats.totalBooks} />
-          <StatCard
-            label="Lidos"
-            value={stats.booksRead}
-            color="text-green-400"
-          />
-          <StatCard
-            label="Lendo"
-            value={stats.booksReading}
-            color="text-blue-400"
-          />
-          <StatCard
-            label="Quero ler"
-            value={stats.booksWantToRead}
-            color="text-yellow-400"
-          />
-        </div>
-
-        {/* Destaques + Releituras */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
-            <p className="text-gray-400 text-xs md:text-sm">Nota média</p>
-            <p className="text-xl md:text-2xl font-bold font-mono mt-1">
-              {stats.averageRating > 0 ? `${stats.averageRating}/10` : "—"}
-            </p>
+          {/* Resumo */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <StatCard label="Total de livros" value={stats.totalBooks} />
+            <StatCard
+              label="Lidos"
+              value={stats.booksRead}
+              color="text-green-400"
+            />
+            <StatCard
+              label="Lendo"
+              value={stats.booksReading}
+              color="text-blue-400"
+            />
+            <StatCard
+              label="Quero ler"
+              value={stats.booksWantToRead}
+              color="text-yellow-400"
+            />
           </div>
-          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
-            <p className="text-gray-400 text-xs md:text-sm">Gênero mais lido</p>
-            <p className="text-xl md:text-2xl font-bold font-mono mt-1 text-pink-400 truncate">
-              {topGenre ? topGenre.genre : "—"}
-            </p>
-            {topGenre && (
-              <p className="text-gray-500 text-xs mt-1">
-                {topGenre.count} {topGenre.count === 1 ? "livro" : "livros"}
+
+          {/* Destaques + Releituras */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-background border border-gray-900 rounded-xl p-3 md:p-5">
+              <p className="text-gray-400 text-xs md:text-sm">Nota média</p>
+              <p className="text-xl md:text-2xl font-bold font-mono mt-1">
+                {stats.averageRating > 0 ? `${stats.averageRating}/10` : "—"}
               </p>
-            )}
-          </div>
-          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
-            <p className="text-gray-400 text-xs md:text-sm">Mês mais lido</p>
-            <p className="text-xl md:text-2xl font-bold font-mono mt-1 text-pink-400">
-              {topMonth.month ? formatMonth(topMonth.month) : "—"}
-            </p>
-            {topMonth.count > 0 && (
-              <p className="text-gray-500 text-xs mt-1">
-                {topMonth.count} {topMonth.count === 1 ? "livro" : "livros"}
+            </div>
+            <div className="bg-backgroun border border-gray-900 rounded-xl p-3 md:p-5">
+              <p className="text-gray-400 text-xs md:text-sm">
+                Gênero mais lido
               </p>
-            )}
-          </div>
-          <div className="bg-gray-900 rounded-xl p-3 md:p-5">
-            <p className="text-gray-400 text-xs md:text-sm">Releituras</p>
-            <p className="text-xl md:text-2xl font-bold font-mono mt-1">
-              {stats.totalRereads}
-            </p>
-          </div>
-        </div>
-
-        {/* Gêneros e Meses lado a lado */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* Top gêneros */}
-          <div className="bg-gray-900 rounded-xl p-5 space-y-3">
-            <p className="text-gray-400 text-sm font-medium">
-              Livros lidos por gênero
-            </p>
-            {stats.topGenres.length === 0 && (
-              <p className="text-gray-500 text-sm">Nenhum livro lido ainda.</p>
-            )}
-            {stats.topGenres.map((g) => (
-              <div key={g.genre} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{g.genre}</span>
-                  <span className="text-gray-400">{g.count}</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div
-                    className="bg-pink-400 h-2 rounded-full transition-all"
-                    style={{ width: `${(g.count / maxGenreCount) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              <p className="text-xl md:text-2xl font-bold font-mono mt-1 text-pink-400 truncate">
+                {topGenre ? topGenre.genre : "—"}
+              </p>
+              {topGenre && (
+                <p className="text-gray-500 text-xs mt-1">
+                  {topGenre.count} {topGenre.count === 1 ? "livro" : "livros"}
+                </p>
+              )}
+            </div>
+            <div className="bg-background border border-gray-900 rounded-xl p-3 md:p-5">
+              <p className="text-gray-400 text-xs md:text-sm">Mês mais lido</p>
+              <p className="text-xl md:text-2xl font-bold font-mono mt-1 text-pink-400">
+                {topMonth.month ? formatMonth(topMonth.month) : "—"}
+              </p>
+              {topMonth.count > 0 && (
+                <p className="text-gray-500 text-xs mt-1">
+                  {topMonth.count} {topMonth.count === 1 ? "livro" : "livros"}
+                </p>
+              )}
+            </div>
+            <div className="bg-background border border-gray-900 rounded-xl p-3 md:p-5">
+              <p className="text-gray-400 text-xs md:text-sm">Releituras</p>
+              <p className="text-xl md:text-2xl font-bold font-mono mt-1">
+                {stats.totalRereads}
+              </p>
+            </div>
           </div>
 
-          {/* Leituras por mês */}
-          <div className="bg-gray-900 rounded-xl p-5 space-y-3">
-            <p className="text-gray-400 text-sm font-medium">
-              Livros lidos por mês
-            </p>
-            {stats.monthlyReads.length === 0 && (
-              <p className="text-gray-500 text-sm">Nenhum livro lido ainda.</p>
-            )}
-            {stats.monthlyReads.map((m) => (
-              <div key={m.month} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{formatMonth(m.month)}</span>
-                  <span className="text-gray-400">{m.count}</span>
+          {/* Gêneros e Meses lado a lado */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Top gêneros */}
+            <div className="bg-background border border-gray-900 rounded-xl p-5 space-y-3">
+              <p className="text-gray-400 text-sm font-medium">
+                Livros lidos por gênero
+              </p>
+              {stats.topGenres.length === 0 && (
+                <p className="text-gray-500 text-sm">
+                  Nenhum livro lido ainda.
+                </p>
+              )}
+              {stats.topGenres.map((g) => (
+                <div key={g.genre} className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>{g.genre}</span>
+                    <span className="text-gray-400">{g.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-800 rounded-full h-2">
+                    <div
+                      className="bg-pink-400 h-2 rounded-full transition-all"
+                      style={{ width: `${(g.count / maxGenreCount) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div
-                    className="bg-pink-400 h-2 rounded-full transition-all"
-                    style={{ width: `${(m.count / maxMonthCount) * 100}%` }}
-                  />
+              ))}
+            </div>
+
+            {/* Leituras por mês */}
+            <div className="bg-background border border-gray-900 rounded-xl p-5 space-y-3">
+              <p className="text-gray-400 text-sm font-medium">
+                Livros lidos por mês
+              </p>
+              {stats.monthlyReads.length === 0 && (
+                <p className="text-gray-500 text-sm">
+                  Nenhum livro lido ainda.
+                </p>
+              )}
+              {stats.monthlyReads.map((m) => (
+                <div key={m.month} className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>{formatMonth(m.month)}</span>
+                    <span className="text-gray-400">{m.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-800 rounded-full h-2">
+                    <div
+                      className="bg-pink-400 h-2 rounded-full transition-all"
+                      style={{ width: `${(m.count / maxMonthCount) * 100}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
         </main>
       </SidebarInset>
     </SidebarProvider>
@@ -215,9 +221,11 @@ function StatCard({
   color?: string;
 }) {
   return (
-    <div className="bg-gray-900 rounded-xl p-3 md:p-4">
+    <div className="bg-background border border-gray-900 rounded-xl p-3 md:p-4">
       <p className="text-gray-400 text-xs">{label}</p>
-      <p className={`text-xl md:text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
+      <p className={`text-xl md:text-2xl font-bold font-mono mt-1 ${color}`}>
+        {value}
+      </p>
     </div>
   );
 }
